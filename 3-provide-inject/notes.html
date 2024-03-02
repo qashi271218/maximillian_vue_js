@@ -1,0 +1,89 @@
+--------------------------------------------------------------
+1. provide and inject to pass data from parent to child
+--------------------------------------------------------------
+Parent - App
+<script>
+    const topics = reactive([
+        {
+            id: 'basics',
+            title: 'The Basics',
+            description: 'Core Vue basics you have to know',
+            fullText:
+                'Vue is a great framework and it has a couple of key concepts: Data binding, events, components and reactivity - that should tell you something!',
+        },
+        {
+            id: 'components',
+            title: 'Components',
+            description: 'Components are a core concept for building Vue UIs and apps',
+            fullText:
+                'With components, you can split logic (and markup) into separate building blocks and then combine those building blocks (and re-use them) to build powerful user interfaces.',
+        },
+    ]);
+
+    provide('topics', topics);
+</script>
+
+Child - Knowledge Grid
+
+<script>
+    const topics = inject('topics');
+</script>
+
+----------------------------------------------------------------------------
+2. provide and inject to pass data from child to parent using event Listener
+-----------------------------------------------------------------------------
+Child - KnowledgeElement
+<button @click="selectTopic(id)">Learn More</button>
+<script>
+    const selectTopic = inject('selectTopic');
+</script>
+
+Parent - App
+
+<script>
+    const activeTopic = ref(null);
+    const activateTopic = (topicId) => {
+        activeTopic.value = topics.find((topic) => topic.id === topicId);
+    };
+    provide('selectTopic', activateTopic);
+</script>
+
+-----------------------------------------------------------------------
+3. provide and inject to pass data from child to parent using function
+-----------------------------------------------------------------------
+Exmaple- 5-learning-resource-app-project
+
+Child - Add Resource
+<script>
+    const storeResource = inject("storeResource");
+    const submitData = () => {
+        if (
+            titleInput.value === "" ||
+            descInput.value === "" ||
+            linkInput.value === ""
+        ) {
+            inputIsInvalid.value = true;
+            return;
+        }
+        storeResource(titleInput.value, descInput.value, linkInput.value);
+        titleInput.value = "";
+        descInput.value = "";
+        linkInput.value = "";
+    };
+</script>
+
+Parent - The Resource
+
+<script>
+    const storeResource = (title, description, link) => {
+        const newResource = {
+            id: new Date().toISOString(),
+            title,
+            description,
+            link,
+        };
+        resources.value.unshift(newResource);
+        activeComponent.value = ListResources;
+    };
+    provide("storeResource", storeResource);
+</script>

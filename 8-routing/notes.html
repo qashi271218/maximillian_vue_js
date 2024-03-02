@@ -1,0 +1,69 @@
+{ path: '/teams', name: 'teams', component: TeamsList }
+--------------------------------------------------------------------
+1. To gave url router link via path parameter
+--------------------------------------------------------------------
+<router-link :to="'/teams'">Link</router-link>
+<router-link to="teams">Teams</router-link>
+<router-link :to="`/teams/${id}`">View Members</router-link>
+
+--------------------------------------------------------------------
+2. To gave url router link url via name parameter
+--------------------------------------------------------------------
+<router-link :to="{ name: 'teams' }">Link</router-link>
+<router-link :to="{ name: 'view-team', params: { teamId: id } }"></router-link>
+-----------------------------------------------------------------------------------
+3. To change by default router-link-active-class and router-link-excat-active-class
+-----------------------------------------------------------------------------------
+routes: [
+{ path: '/teams', name: 'teams', component: TeamsList },
+{ path: '/users', name: 'users', component: UsersList },
+],
+linkActiveClass: 'active',
+linkExactActiveClass:'exact-active'
+
+-----------------------------------------------------------------------------------
+4. To redirect to custom link with id attribute
+-----------------------------------------------------------------------------------
+<script>
+    { path: '/teams/:teamId', name: 'view-team', component: TeamMembers, props: true }
+
+    const props = defineProps(['teamId']);
+    const teamId = ref(props.teamId);
+
+    const loadTeamMembers = (newId) => {
+        //const teamId = route.params.teamId;
+        const selectedTeam = teams.value.find((team) => team.id == newId);
+        const members = selectedTeam.members;
+        const selectedMembers = [];
+        for (const member of members) {
+            const selectedUser = users.value.find((user) => user.id == member);
+            selectedMembers.push(selectedUser);
+        }
+        membersList.value = selectedMembers;
+        teamName.value = selectedTeam.name;
+    };
+
+    onBeforeUpdate(() => {
+        loadTeamMembers(props.teamId);
+    });
+
+    watch(
+        teamId,
+        (newValue) => {
+            loadTeamMembers(newValue);
+        },
+        {
+            immediate: true,
+        }
+    );
+</script>
+
+-----------------------------------------------------------------------------------
+5. Redirect vs alias
+-----------------------------------------------------------------------------------
+{ path: '/', redirect: '/teams' },
+{ path: '/teams', name: 'teams', component: TeamsList, alias: '/' },
+
+A redirect means when the user visits /home , the URL will be replaced by / , and then matched as / . But what is an
+alias? An alias of / as /home means when the user visits /home , the URL remains /home , but it will be matched as if
+the user is visiting /
